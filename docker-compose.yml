@@ -1,0 +1,66 @@
+services:
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "5001:5001"
+    environment:
+      - SECRET_KEY=poc-secret-key-2024
+    networks:
+      - ecommerce-net
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "5002:5002"
+    environment:
+      - AUTH_SERVICE=http://auth-service:5001
+      - PAYMENT_SERVICE=http://payment-service:5003
+      - NOTIFICATION_SERVICE=http://notification-service:5004
+      - USER_SERVICE=http://user-service:5005
+    depends_on:
+      - auth-service
+    networks:
+      - ecommerce-net
+
+  payment-service:
+    build: ./payment-service
+    ports:
+      - "5003:5003"
+    environment:
+      - AUTH_SERVICE=http://auth-service:5001
+      - ORDER_SERVICE=http://order-service:5002
+      - NOTIFICATION_SERVICE=http://notification-service:5004
+      - USER_SERVICE=http://user-service:5005
+    depends_on:
+      - auth-service
+    networks:
+      - ecommerce-net
+
+  notification-service:
+    build: ./notification-service
+    ports:
+      - "5004:5004"
+    networks:
+      - ecommerce-net
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "5005:5005"
+    networks:
+      - ecommerce-net
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - auth-service
+      - order-service
+      - payment-service
+    networks:
+      - ecommerce-net
+
+networks:
+  ecommerce-net:
+    driver: bridge
