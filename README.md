@@ -50,3 +50,41 @@ Then open **http://localhost:3000**
 - **Auth:** JWT (PyJWT)
 - **Containers:** Docker Compose
 - **Storage:** In-memory (POC — no database)
+- **Observability:** OpenTelemetry (SDK & Collector), Jaeger (Distributed Tracing), Prometheus (Metrics storage), Grafana (Visualization), cAdvisor (Container Resource monitoring)
+
+## Observability Stack
+
+The POC includes a fully automated observability stack containing Jaeger, OpenTelemetry Collector, Prometheus, cAdvisor, and Grafana.
+
+### How to Run
+
+Build and run the entire stack:
+```bash
+docker compose up -d --build
+```
+
+### Verification Endpoints
+
+After launching the services, you can verify and access the observability tools at the following URLs:
+
+| Service | URL | Description |
+|---|---|---|
+| **Jaeger UI** | [http://localhost:16686](http://localhost:16686) | Distributed Tracing visualizer |
+| **Prometheus UI** | [http://localhost:9090](http://localhost:9090) | Metrics query browser |
+| **Grafana UI** | [http://localhost:3010](http://localhost:3010) | Observability dashboards & panels |
+
+### Pre-provisioned Dashboards
+
+Grafana is configured with automatic datasource and dashboard provisioning. When you open Grafana, the Prometheus datasource is pre-configured and connected. You can find the following pre-built dashboards in the **MSc Observability** folder:
+
+1. **Dashboard 1: Microservices Overview**
+   - Shows Requests/sec per service (calculated via spanmetrics)
+   - Total Trace count / Span count
+   - Active Service Activity distribution
+2. **Dashboard 2: Container Resource Usage**
+   - Shows CPU usage by service (cAdvisor)
+   - Memory usage by service (cAdvisor)
+   - Incoming & Outgoing network traffic per service (cAdvisor)
+3. **Dashboard 3: Research Dashboard (MSc Dissertation)**
+   - Compiles request rates, throughput, CPU utilization, memory utilization, and average service response latency trends
+
