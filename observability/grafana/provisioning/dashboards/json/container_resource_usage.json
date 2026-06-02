@@ -201,7 +201,7 @@
   "refresh": "5s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["msc", "observability", "containers"],
+  "tags": ["observability", "containers"],
   "templating": {
     "list": []
   },

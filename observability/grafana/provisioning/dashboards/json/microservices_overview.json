@@ -184,7 +184,7 @@
   "refresh": "5s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["msc", "observability", "microservices"],
+  "tags": ["observability", "microservices"],
   "templating": {
     "list": []
   },

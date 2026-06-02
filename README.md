@@ -75,7 +75,7 @@ After launching the services, you can verify and access the observability tools 
 
 ### Pre-provisioned Dashboards
 
-Grafana is configured with automatic datasource and dashboard provisioning. When you open Grafana, the Prometheus datasource is pre-configured and connected. You can find the following pre-built dashboards in the **MSc Observability** folder:
+Grafana is configured with automatic datasource and dashboard provisioning. When you open Grafana, the Prometheus datasource is pre-configured and connected. You can find the following pre-built dashboards in the **Observability** folder:
 
 1. **Dashboard 1: Microservices Overview**
    - Shows Requests/sec per service (calculated via spanmetrics)
@@ -85,6 +85,6 @@ Grafana is configured with automatic datasource and dashboard provisioning. When
    - Shows CPU usage by service (cAdvisor)
    - Memory usage by service (cAdvisor)
    - Incoming & Outgoing network traffic per service (cAdvisor)
-3. **Dashboard 3: Research Dashboard (MSc Dissertation)**
+3. **Dashboard 3: Research Dashboard**
    - Compiles request rates, throughput, CPU utilization, memory utilization, and average service response latency trends
 

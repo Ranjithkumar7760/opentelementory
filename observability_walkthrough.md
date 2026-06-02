@@ -1,6 +1,6 @@
-# MSc Observability Stack: Implementation Walkthrough
+# Observability Stack: Implementation Walkthrough
 
-This document outlines the detailed architecture, configuration files, and verified metrics queries implemented for the **ShopPOC** microservices application. This setup forms the foundation of your MSc research project metrics collection and visualization.
+This document outlines the detailed architecture, configuration files, and verified metrics queries implemented for the **ShopPOC** microservices application. This setup forms the foundation of your research project metrics collection and visualization.
 
 ---
 

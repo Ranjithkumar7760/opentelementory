@@ -1,9 +1,9 @@
 apiVersion: 1
 
 providers:
-  - name: 'MSc Observability Dashboards'
+  - name: 'Observability Dashboards'
     orgId: 1
-    folder: 'MSc Observability'
+    folder: 'Observability'
     type: file
     disableDeletion: false
     editable: true
