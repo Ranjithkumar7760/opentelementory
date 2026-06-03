@@ -93,3 +93,47 @@ kubectl get pods -n ecommerce-poc
 *   **Grafana Dashboards**: Access via `http://<node-ip>:30010` (For Minikube, run `minikube service grafana -n ecommerce-poc` or port-forward using `kubectl port-forward svc/grafana 30010:3010 -n ecommerce-poc`).
 *   **Jaeger UI**: Port-forward using `kubectl port-forward svc/jaeger 16686:16686 -n ecommerce-poc`.
 *   **Prometheus UI**: Port-forward using `kubectl port-forward svc/prometheus 9090:9090 -n ecommerce-poc`.
+
+---
+
+## Deploying to AWS EKS
+
+Deploying to managed environments like AWS EKS requires pushing your Docker images to a registry (such as Amazon ECR) and ensuring Kubelet metrics are scraping correctly.
+
+### 1. Build and Push Images to Amazon ECR
+Create ECR repositories for your services and push the built images:
+
+```bash
+# Log in to Amazon ECR
+aws ecr get-login-password --region <region> | docker login --username AWS --password-stdin <aws_account_id>.dkr.ecr.<region>.amazonaws.com
+
+# Build and tag your microservices (e.g. auth-service)
+docker build -t auth-service:latest ./auth-service
+docker tag auth-service:latest <aws_account_id>.dkr.ecr.<region>.amazonaws.com/auth-service:latest
+
+# Push to your ECR repository
+docker push <aws_account_id>.dkr.ecr.<region>.amazonaws.com/auth-service:latest
+```
+Repeat for all 6 microservices (`auth-service`, `order-service`, `payment-service`, `notification-service`, `user-service`, `frontend`).
+
+### 2. Update Image Paths in Kubernetes Manifests
+Update the `image:` fields in `kubernetes/microservices.yaml` from `auth-service:latest`, etc. to point to your ECR repository URLs:
+```yaml
+      containers:
+        - name: auth-service
+          image: <aws_account_id>.dkr.ecr.<region>.amazonaws.com/auth-service:latest
+```
+
+### 3. Service Access on AWS EKS
+In EKS, local NodePorts (`30000`/`30010`) are accessible on node IPs, but it is recommended to change the service types to `LoadBalancer` to provision AWS NLB/ALB:
+```yaml
+# In kubernetes/microservices.yaml for frontend service:
+spec:
+  type: LoadBalancer
+```
+
+### 4. cAdvisor Metrics Scraping on EKS
+* **Kubelet Metrics:** The prometheus configuration in `kubernetes/prometheus-config.yaml` is pre-configured to scrape cAdvisor metrics from the nodes using Kubelet's metrics endpoint `/metrics/cadvisor` via the Kubernetes API server proxy.
+* **Security Groups:** Ensure that the security group of your EKS control plane allows ingress traffic on port `10250` (kubelet) from the node security groups so the API server can proxy scraping requests.
+* **Compatibility:** Grafana dashboards (`grafana-dashboards.yaml`) automatically read these Kubernetes cAdvisor metrics (`container` labels) and populate CPU/Memory metrics dynamically.
+

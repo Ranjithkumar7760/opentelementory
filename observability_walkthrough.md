@@ -180,8 +180,7 @@ scrape_configs:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
-      - /var/lib/docker:/var/lib/docker:ro
-      - /var/snap/docker/common/var-lib-docker:/var/snap/docker/common/var-lib-docker:ro
+      - /var:/var:ro
       - /dev/disk/:/dev/disk:ro
     entrypoint:
       - /bin/sh
@@ -202,7 +201,7 @@ scrape_configs:
 ```
 
 > [!NOTE]
-> The cAdvisor service is configured to automatically support both standard Docker (`/var/lib/docker`) and Snap-based Docker (`/var/snap/docker/...`) installations. It mounts both host directories, and the entrypoint shell script automatically detects which directory is populated on the host, passing the appropriate `--docker_root` argument to cAdvisor. This allows the exact same Docker Compose file to be run on any host without modification.
+> The cAdvisor service is configured to automatically support both standard Docker (`/var/lib/docker`) and Snap-based Docker (`/var/snap/docker/...`) installations. It mounts the parent `/var` directory (`/var:/var:ro`) to avoid container startup failures on hosts with read-only root filesystems (where missing directories cannot be automatically created on the host). The entrypoint shell script automatically detects which directory is populated on the host, passing the appropriate `--docker_root` argument to cAdvisor. This allows the exact same Docker Compose file to be run on any host without modification.
 
 ---
 
