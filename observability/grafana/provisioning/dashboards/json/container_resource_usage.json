@@ -43,8 +43,8 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=~\"auth-service|order-service|payment-service|notification-service|user-service\"}[1m])) by (container_label_com_docker_compose_service) * 100",
-          "legendFormat": "{{container_label_com_docker_compose_service}}",
+          "expr": "sum(rate(label_replace(label_replace((container_cpu_usage_seconds_total{container_label_com_docker_compose_service=~\"auth-service|order-service|payment-service|notification-service|user-service\"}) or (container_cpu_usage_seconds_total{container=~\"auth-service|order-service|payment-service|notification-service|user-service\"}), \"service\", \"$1\", \"container_label_com_docker_compose_service\", \"(.+)\"), \"service\", \"$1\", \"container\", \"(.+)\")[1m])) by (service) * 100",
+          "legendFormat": "{{service}}",
           "range": true,
           "refId": "A"
         }
@@ -98,8 +98,8 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(container_memory_usage_bytes{container_label_com_docker_compose_service=~\"auth-service|order-service|payment-service|notification-service|user-service\"}) by (container_label_com_docker_compose_service)",
-          "legendFormat": "{{container_label_com_docker_compose_service}}",
+          "expr": "sum(label_replace(label_replace((container_memory_usage_bytes{container_label_com_docker_compose_service=~\"auth-service|order-service|payment-service|notification-service|user-service\"}) or (container_memory_usage_bytes{container=~\"auth-service|order-service|payment-service|notification-service|user-service\"}), \"service\", \"$1\", \"container_label_com_docker_compose_service\", \"(.+)\"), \"service\", \"$1\", \"container\", \"(.+)\")) by (service)",
+          "legendFormat": "{{service}}",
           "range": true,
           "refId": "A"
         }
@@ -153,8 +153,8 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_network_receive_bytes_total{container_label_com_docker_compose_service=~\"auth-service|order-service|payment-service|notification-service|user-service\"}[1m])) by (container_label_com_docker_compose_service)",
-          "legendFormat": "{{container_label_com_docker_compose_service}} (RX)",
+          "expr": "sum(rate(label_replace(label_replace((container_network_receive_bytes_total{container_label_com_docker_compose_service=~\"auth-service|order-service|payment-service|notification-service|user-service\"}) or (container_network_receive_bytes_total{container=~\"auth-service|order-service|payment-service|notification-service|user-service\"}), \"service\", \"$1\", \"container_label_com_docker_compose_service\", \"(.+)\"), \"service\", \"$1\", \"container\", \"(.+)\")[1m])) by (service)",
+          "legendFormat": "{{service}} (RX)",
           "range": true,
           "refId": "A"
         },
@@ -164,8 +164,8 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_network_transmit_bytes_total{container_label_com_docker_compose_service=~\"auth-service|order-service|payment-service|notification-service|user-service\"}[1m])) by (container_label_com_docker_compose_service)",
-          "legendFormat": "{{container_label_com_docker_compose_service}} (TX)",
+          "expr": "sum(rate(label_replace(label_replace((container_network_transmit_bytes_total{container_label_com_docker_compose_service=~\"auth-service|order-service|payment-service|notification-service|user-service\"}) or (container_network_transmit_bytes_total{container=~\"auth-service|order-service|payment-service|notification-service|user-service\"}), \"service\", \"$1\", \"container_label_com_docker_compose_service\", \"(.+)\"), \"service\", \"$1\", \"container\", \"(.+)\")[1m])) by (service)",
+          "legendFormat": "{{service}} (TX)",
           "range": true,
           "refId": "B"
         }

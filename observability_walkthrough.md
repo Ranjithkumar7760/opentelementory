@@ -180,8 +180,20 @@ scrape_configs:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
-      - /var/snap/docker/common/var-lib-docker:/var/lib/docker:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /var/snap/docker/common/var-lib-docker:/var/snap/docker/common/var-lib-docker:ro
       - /dev/disk/:/dev/disk:ro
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        if [ -d "/var/snap/docker/common/var-lib-docker" ] && [ "$$(ls -A /var/snap/docker/common/var-lib-docker 2>/dev/null)" ]; then
+          echo "Detected Snap Docker root directory. Running cAdvisor with snap path..."
+          exec /usr/bin/cadvisor --docker_root=/var/snap/docker/common/var-lib-docker "$$@"
+        else
+          echo "Detected standard Docker root directory. Running cAdvisor with standard path..."
+          exec /usr/bin/cadvisor --docker_root=/var/lib/docker "$$@"
+        fi
     ports:
       - "8080:8080"
     networks:
@@ -190,7 +202,7 @@ scrape_configs:
 ```
 
 > [!NOTE]
-> Since Docker on your test host is running inside a `snap` package, the cAdvisor volume mount is configured to `/var/snap/docker/common/var-lib-docker:/var/lib/docker:ro`. This ensures cAdvisor reads your container runtime metrics correctly without failing on missing directory mounts.
+> The cAdvisor service is configured to automatically support both standard Docker (`/var/lib/docker`) and Snap-based Docker (`/var/snap/docker/...`) installations. It mounts both host directories, and the entrypoint shell script automatically detects which directory is populated on the host, passing the appropriate `--docker_root` argument to cAdvisor. This allows the exact same Docker Compose file to be run on any host without modification.
 
 ---
 
@@ -216,15 +228,15 @@ To support the three provisioned Grafana dashboards, the following queries have 
 ### 3.2. Container Utilization Metrics (via cAdvisor)
 * **CPU Usage (%) per Service**:
   ```promql
-  sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=~"auth-service|order-service|payment-service|notification-service|user-service"}[1m])) by (container_label_com_docker_compose_service) * 100
+  sum(rate(label_replace(label_replace((container_cpu_usage_seconds_total{container_label_com_docker_compose_service=~"auth-service|order-service|payment-service|notification-service|user-service"}) or (container_cpu_usage_seconds_total{container=~"auth-service|order-service|payment-service|notification-service|user-service"}), "service", "$1", "container_label_com_docker_compose_service", "(.+)"), "service", "$1", "container", "(.+)")[1m])) by (service) * 100
   ```
 * **Memory Usage per Service**:
   ```promql
-  sum(container_memory_usage_bytes{container_label_com_docker_compose_service=~"auth-service|order-service|payment-service|notification-service|user-service"}) by (container_label_com_docker_compose_service)
+  sum(label_replace(label_replace((container_memory_usage_bytes{container_label_com_docker_compose_service=~"auth-service|order-service|payment-service|notification-service|user-service"}) or (container_memory_usage_bytes{container=~"auth-service|order-service|payment-service|notification-service|user-service"}), "service", "$1", "container_label_com_docker_compose_service", "(.+)"), "service", "$1", "container", "(.+)")) by (service)
   ```
 * **Total Network Throughput (RX + TX Bps)**:
   ```promql
-  sum(rate(container_network_receive_bytes_total{container_label_com_docker_compose_service=~"auth-service|order-service|payment-service|notification-service|user-service"}[1m]) + rate(container_network_transmit_bytes_total{container_label_com_docker_compose_service=~"auth-service|order-service|payment-service|notification-service|user-service"}[1m])) by (container_label_com_docker_compose_service)
+  sum(rate(label_replace(label_replace((container_network_receive_bytes_total{container_label_com_docker_compose_service=~"auth-service|order-service|payment-service|notification-service|user-service"}) or (container_network_receive_bytes_total{container=~"auth-service|order-service|payment-service|notification-service|user-service"}), "service", "$1", "container_label_com_docker_compose_service", "(.+)"), "service", "$1", "container", "(.+)")[1m]) + rate(label_replace(label_replace((container_network_transmit_bytes_total{container_label_com_docker_compose_service=~"auth-service|order-service|payment-service|notification-service|user-service"}) or (container_network_transmit_bytes_total{container=~"auth-service|order-service|payment-service|notification-service|user-service"}), "service", "$1", "container_label_com_docker_compose_service", "(.+)"), "service", "$1", "container", "(.+)")[1m])) by (service)
   ```
 
 ---

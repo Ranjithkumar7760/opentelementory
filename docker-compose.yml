@@ -126,8 +126,20 @@ services:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
-      - /var/snap/docker/common/var-lib-docker:/var/lib/docker:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /var/snap/docker/common/var-lib-docker:/var/snap/docker/common/var-lib-docker:ro
       - /dev/disk/:/dev/disk:ro
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        if [ -d "/var/snap/docker/common/var-lib-docker" ] && [ "$$(ls -A /var/snap/docker/common/var-lib-docker 2>/dev/null)" ]; then
+          echo "Detected Snap Docker root directory. Running cAdvisor with snap path..."
+          exec /usr/bin/cadvisor --docker_root=/var/snap/docker/common/var-lib-docker "$$@"
+        else
+          echo "Detected standard Docker root directory. Running cAdvisor with standard path..."
+          exec /usr/bin/cadvisor --docker_root=/var/lib/docker "$$@"
+        fi
     ports:
       - "8080:8080"
     networks:
