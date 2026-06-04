@@ -113,6 +113,7 @@ services:
     volumes:
       - grafana-storage:/var/lib/grafana
       - ./observability/grafana/provisioning:/etc/grafana/provisioning
+      - ./observability/grafana/provisioning/dashboards:/var/lib/grafana/dashboards
     depends_on:
       - prometheus
     networks:
@@ -122,6 +123,7 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
+    privileged: true
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -141,6 +143,19 @@ services:
         fi
     ports:
       - "8080:8080"
+    networks:
+      - ecommerce-net
+    restart: unless-stopped
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro'
     networks:
       - ecommerce-net
     restart: unless-stopped

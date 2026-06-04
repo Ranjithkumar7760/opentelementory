@@ -176,6 +176,7 @@ scrape_configs:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
+    privileged: true
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
